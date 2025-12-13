@@ -1,14 +1,12 @@
-import { PrismaClient } from './generated/prisma';
-import dotenv from "dotenv";
-dotenv.config();
+import { PrismaClient } from "@prisma/client";
 
-// Extend the global object to include the PrismaClient instance
-declare global {
-  var prisma: PrismaClient | undefined;
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prismaClient =
+  globalForPrisma.prisma ?? new PrismaClient({});
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prismaClient;
 }
-
-export const prisma = globalThis.prisma || new PrismaClient();
-// Ensure the PrismaClient instance is not recreated in development
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
-
-export default prisma;

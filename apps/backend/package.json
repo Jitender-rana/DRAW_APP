@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@repo/backend": "workspace:*",
     "@repo/db-package": "workspace:*",
     "@types/axios": "^0.9.36",
     "@types/cors": "^2.8.19",
@@ -22,8 +23,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.3",
     "typecript": "0.0.1-security",
     "typescript": "^5.8.3",
     "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10"
   }
 }
