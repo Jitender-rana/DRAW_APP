@@ -1,6 +1,7 @@
 import {WebSocketServer,WebSocket} from "ws";
 import { prismaClient } from "@repo/db-package/client";
 import { JWT_SECRET } from "@repo/backend/config";
+import { shapeQueue } from "@repo/redis-client/queue";
 import jwt from "jsonwebtoken";
 
 const wss = new WebSocketServer({port: 8080});
@@ -66,13 +67,18 @@ wss.on("connection",(ws,request)=>{
             const roomId=Number (parsedData.roomId);
             const ShapeData=parsedData.ShapeData;
             //JSON.stringify(ShapeData);
-            await prismaClient.shape.create({
-                data:{
-                    roomId:roomId,
-                    userId:userID,
-                    cordinates: JSON.stringify(ShapeData)
-                }
-            })
+            // await prismaClient.shape.create({
+            //     data:{
+            //         roomId:roomId,
+            //         userId:userID,
+            //         cordinates: JSON.stringify(ShapeData)
+            //     }
+            // })
+            await shapeQueue.add("shapeDrawJob",{
+                roomId:roomId,
+                userId:userID,
+                cordinates: JSON.stringify(ShapeData)
+            });
             const sockets=RoomSockets.get(roomId);
             sockets?.forEach((client)=>{//Sabhi other clients ko bhejna hai
                 if(client!==ws && client.readyState===WebSocket.OPEN){
@@ -99,7 +105,7 @@ wss.on("connection",(ws,request)=>{
                 RoomSockets.delete(roomId);
             };
         })
-        UserRooms.delete(userId);
+        //UserRooms.delete(userId);If a user opens multiple tabs / connections, closing one socket will delete all rooms for that user, even though other sockets may still be active.
         SocketToUser.delete(ws);
 
     })
